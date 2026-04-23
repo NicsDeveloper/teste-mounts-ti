@@ -1,0 +1,14 @@
+using Ambev.DeveloperEvaluation.Application.Sales.ListSales;
+using AutoMapper;
+
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.ListSales;
+
+public class ListSalesProfile : Profile
+{
+    public ListSalesProfile()
+    {
+        CreateMap<ListSalesItemResult, ListSalesItemResponse>();
+        CreateMap<ListSalesResult, ListSalesResponse>()
+            .ForMember(d => d.Sales, o => o.MapFrom(s => s.Sales));
+    }
+}
