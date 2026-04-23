@@ -36,9 +36,22 @@ public class SaleRepository : ISaleRepository
 
     public async Task<Sale> UpdateAsync(Sale sale, CancellationToken cancellationToken = default)
     {
-        _context.Sales.Update(sale);
+        var existing = await _context.Sales
+            .Include(s => s.Items)
+            .FirstOrDefaultAsync(s => s.Id == sale.Id, cancellationToken);
+
+        if (existing == null)
+            throw new KeyNotFoundException($"Sale with ID {sale.Id} not found.");
+
+        _context.SaleItems.RemoveRange(existing.Items);
+
+        _context.Entry(existing).CurrentValues.SetValues(sale);
+
+        foreach (var item in sale.Items)
+            _context.SaleItems.Add(item);
+
         await _context.SaveChangesAsync(cancellationToken);
-        return sale;
+        return existing;
     }
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
